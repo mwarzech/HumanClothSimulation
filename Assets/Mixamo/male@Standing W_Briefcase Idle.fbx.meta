@@ -6,7 +6,27 @@ ModelImporter:
   - first:
       74: -203655887218126122
     second: mixamo.com
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: grey_shorts
+    second: {fileID: 2100000, guid: caf97c06a6a9b91469e5275d8beaee07, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: high-poly
+    second: {fileID: 2100000, guid: c4f696166c4cd704bb49f7d50af9a39c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: male
+    second: {fileID: 2100000, guid: 5ee215278e97ae446a400bbcebcf84d6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: short04
+    second: {fileID: 2100000, guid: 57eaf510d0eab0a478e5260bd99b0bed, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
