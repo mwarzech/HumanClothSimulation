@@ -26,7 +26,8 @@ public class GeneratingSpheres : MonoBehaviour
         for (int i = 0; i < spheres.Length; ++i)
         {
             spheres[i] = new GameObject("Sphere");
-            spheres[i].transform.position = mesh.vertices[i * (1 + skipVertex)];
+            spheres[i].transform.position = mesh.vertices[i * (1 + skipVertex)] 
+                                            - (mesh.normals[i * (1 + skipVertex)] * sphereRadius);
             SphereCollider collider = spheres[i].AddComponent<SphereCollider>();
             collider.radius = sphereRadius;
             clothSpheres[i].first = collider;
@@ -38,7 +39,8 @@ public class GeneratingSpheres : MonoBehaviour
     {
         for (int i = 0; i < spheres.Length; ++i)
         {
-            spheres[i].transform.position = mesh.vertices[i * (1 + skipVertex)];
+            spheres[i].transform.position = mesh.vertices[i * (1 + skipVertex)]
+                                            - (mesh.normals[i * (1 + skipVertex)] * sphereRadius);
         }
     }
 
