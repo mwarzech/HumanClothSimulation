@@ -413,8 +413,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 1815815464}
   cloth: {fileID: 1336999702}
-  sphereRadius: 0.1
-  skipVertex: 3
+  sphereRadius: 0.2
+  skipVertex: 10
 --- !u!1 &446189841
 GameObject:
   m_ObjectHideFlags: 0

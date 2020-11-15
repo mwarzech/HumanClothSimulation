@@ -22,15 +22,16 @@ public class GeneratingSpheres : MonoBehaviour
     private void CreateSpheres()
     {
         spheres = new GameObject[(int)(mesh.vertices.Length / (1+skipVertex))];
-        cloth.sphereColliders = new ClothSphereColliderPair[spheres.Length];
+        ClothSphereColliderPair[] clothSpheres = new ClothSphereColliderPair[spheres.Length];
         for (int i = 0; i < spheres.Length; ++i)
         {
             spheres[i] = new GameObject("Sphere");
             spheres[i].transform.position = mesh.vertices[i * (1 + skipVertex)];
             SphereCollider collider = spheres[i].AddComponent<SphereCollider>();
             collider.radius = sphereRadius;
-            cloth.sphereColliders[i] = new ClothSphereColliderPair(collider);
+            clothSpheres[i].first = collider;
         }
+        cloth.sphereColliders = clothSpheres;
     }
 
     private void UpdateSpheres()
