@@ -1,14 +1,11 @@
-﻿using System;
+﻿#define CLOTH_DEBUG
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-struct SphereCol
-{
-    public Transform transform;
-    public float radius;
-}
 
 public class ClothSim2 : MonoBehaviour
 {
@@ -29,13 +26,16 @@ public class ClothSim2 : MonoBehaviour
     int[] triangles;
     float[] distances;
     Vector3[] normals;
-
-    SphereCol[] spheres;
-
+    
+    public ClothCollisions collisionHandler;
 
     List<int>[] clothToVerts;
     int[] vertToCloth;
     Dictionary<Vector3, List<int>> vertexDict;
+
+#if CLOTH_DEBUG
+    int debugInd = 1 * 3;
+#endif
 
     private int PosToVertIndex(int posIndex)
     {
@@ -104,20 +104,9 @@ public class ClothSim2 : MonoBehaviour
         }
     }
 
-    void InitializeExternalColliders()
-    {
-        // Get positions and radii of possible spheres to collide with
-        spheres = GameObject.FindObjectsOfType<SphereCollider>().Select(s => new SphereCol() {
-            transform = s.transform,
-            radius = s.radius * s.transform.localScale.x
-        }).ToArray();
-    }
-
     // Use this for initialization
     void Start()
     {
-        InitializeExternalColliders();
-
         // Get cloth mesh vertex positions
         acceleration = new Vector3(0.0f, -9.81f, 0.0f);
 
@@ -132,8 +121,7 @@ public class ClothSim2 : MonoBehaviour
         InitializePositions(clothToVerts);
         InitializeDistances(triangles, positions);
 
-        //DEBUG
-        int debugInd = 4 * 3;
+#if CLOTH_DEBUG
         Vector3 pos1 = positions[VertToPosIndex(triangles[debugInd])];
         Vector3 pos2 = positions[VertToPosIndex(triangles[debugInd + 1])];
         Vector3 pos3 = positions[VertToPosIndex(triangles[debugInd + 2])];
@@ -143,7 +131,7 @@ public class ClothSim2 : MonoBehaviour
         Debug.Log(distances[debugInd]);
         Debug.Log(distances[debugInd + 1]);
         Debug.Log(distances[debugInd + 2]);
-        //DEBUG
+#endif
 
         //MakeMeshDoubleFaced();
     }
@@ -255,7 +243,23 @@ public class ClothSim2 : MonoBehaviour
         HandleGroundCollision(index, groundLevel);
 
         // Sphere collision constraints
-        for (int i = 0; i < spheres.Length; i++)
+        Vector3 pos = positions[VertToPosIndex(triangles[index])]
+            + positions[VertToPosIndex(triangles[index + 1])]
+            + positions[VertToPosIndex(triangles[index + 2])];
+        pos /= 3f;
+        List<Vector3> spheres = collisionHandler.GetNearestPoints(pos);
+
+#if CLOTH_DEBUG
+        if (index == debugInd)
+        {
+            foreach(Vector3 sphere in spheres)
+            {
+                Debug.Log(sphere);
+            }
+        }
+#endif
+
+        for (int i = 0; i < spheres.Count; i++)
         {
             HandleSphereCollision(index, spheres[i]);
         }
@@ -302,20 +306,20 @@ public class ClothSim2 : MonoBehaviour
         }
     }
 
-    void HandleSphereCollision(int index, SphereCol sphere)
+    void HandleSphereCollision(int index, Vector3 sphere)
     {
-        Vector3 vecToTriangle = FindPoinToTriangleVec(sphere.transform.position,
+        Vector3 vecToTriangle = FindPoinToTriangleVec(sphere,
                                                     positions[VertToPosIndex(triangles[index])], 
                                                     positions[VertToPosIndex(triangles[index + 1])], 
                                                     positions[VertToPosIndex(triangles[index + 2])]);
 
         float dist = vecToTriangle.magnitude;
 
-        if (dist < sphere.radius + EPSILON)
+        if (dist < collisionHandler.collisionRadius + EPSILON)
         {
-            positions[VertToPosIndex(triangles[index])] += vecToTriangle.normalized * (sphere.radius - dist + EPSILON);
-            positions[VertToPosIndex(triangles[index + 1])] += vecToTriangle.normalized * (sphere.radius - dist + EPSILON);
-            positions[VertToPosIndex(triangles[index + 2])] += vecToTriangle.normalized * (sphere.radius - dist + EPSILON);
+            positions[VertToPosIndex(triangles[index])] += vecToTriangle.normalized * (collisionHandler.collisionRadius - dist + EPSILON);
+            positions[VertToPosIndex(triangles[index + 1])] += vecToTriangle.normalized * (collisionHandler.collisionRadius - dist + EPSILON);
+            positions[VertToPosIndex(triangles[index + 2])] += vecToTriangle.normalized * (collisionHandler.collisionRadius - dist + EPSILON);
         }
     }
 
