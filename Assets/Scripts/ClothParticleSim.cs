@@ -135,7 +135,7 @@ public class ClothParticleSim : MonoBehaviour
         mesh = GetComponent<MeshFilter>().mesh;
 
         vertices = mesh.vertices;
-        normals = new Vector3[mesh.normals.Length];
+        normals = mesh.normals;// new Vector3[mesh.normals.Length];
         InitializeClothVertices(vertices);
         InitializeClothTriangles(mesh.triangles, vertToCloth);
         InitializePositions(clothToVerts);
@@ -176,11 +176,11 @@ public class ClothParticleSim : MonoBehaviour
             {
                 SatisfyClothConstraints(i);
                 hasColided |= SatisfyEnvironmentConstraints(i);
-                if (s == physicsIterationsPerFrame - 1)
+                /*if (s == physicsIterationsPerFrame - 1)
                 {
                     //PerformVerletIntegration(i, hasColided);
-                    CalculateNormals(i);
-                }
+                    //CalculateNormals(i);
+                }*/
             }
         }
     }
@@ -258,7 +258,7 @@ public class ClothParticleSim : MonoBehaviour
         }
     }
 
-    bool HandleClothCollision(int index)
+    bool HandleBodyCollision(int index)
     {
         // Sphere collision constraints
         List<VertWithNorm> spheres = collisionHandler.GetNearestPoints(positions[index]);
@@ -297,7 +297,7 @@ public class ClothParticleSim : MonoBehaviour
         // Platform constraint
         hasColided |= HandleGroundCollision(index, groundLevel);
 
-        hasColided |= HandleClothCollision(index);
+        hasColided |= HandleBodyCollision(index);
 
         return hasColided;
 

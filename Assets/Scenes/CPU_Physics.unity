@@ -2326,11 +2326,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17eeb6c11a7fd214cb57eb039da937c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damping: 0.973
+  damping: 0.987
   tolerance: 0
   groundLevel: 0
   physicsIterationsPerFrame: 2
-  acceleration: {x: 0, y: -4, z: 0}
+  acceleration: {x: 0, y: -5, z: 0}
   collisionHandler: {fileID: 376364547}
 --- !u!23 &1711813856236792058
 MeshRenderer:

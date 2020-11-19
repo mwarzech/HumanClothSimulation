@@ -31,7 +31,9 @@ public class MaleAnimationController : MonoBehaviour
 
     private void PlayAnimation()
     {
-        anim.Play(dropdown.options[dropdown.value].text);
+        //anim.Play(dropdown.options[dropdown.value].text);
+        anim.SetInteger("danceNum", dropdown.value);
+        anim.SetBool("dancing", true);
         buttonLabel.text = "Stop Animation";
         isPlaying = true;
     }
@@ -46,6 +48,7 @@ public class MaleAnimationController : MonoBehaviour
         //cloth.SetActive(false);
         //cloth.SetActive(true);
         anim.Play(idleStateName);
+        anim.SetBool("dancing", false);
         buttonLabel.text = "Play Animation";
         isPlaying = false;
     }
