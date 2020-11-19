@@ -10,7 +10,7 @@ public struct VertWithNorm
 
 public class ClothNormalCollisions : MonoBehaviour
 {
-    public SkinnedMeshRenderer collisionMesh;
+    public SkinnedMeshRenderer[] collisionMeshes;
     public float bucketSize = 1f;
     public float collisionRadius;
 
@@ -65,17 +65,17 @@ public class ClothNormalCollisions : MonoBehaviour
         dictionary = new Dictionary<Vector3Int, List<VertWithNorm>>();
     }
 
-    private void AddCollisionMeshToDict()
+    private void AddCollisionMeshToDict(SkinnedMeshRenderer skinnedMesh)
     {
         Mesh mesh = new Mesh();
-        collisionMesh.BakeMesh(mesh);
+        skinnedMesh.BakeMesh(mesh);
         Vector3[] vertices = mesh.vertices;
         Vector3[] normals = mesh.normals;
         for(int i = 0; i < vertices.Length; ++i)
         {
             //Vector3 pos = collisionMesh.transform.TransformPoint(vertices[i] - normals[i].normalized * collisionRadius * 0.5f);
-            Vector3 pos = collisionMesh.transform.TransformPoint(vertices[i]);
-            //Debug.DrawLine(pos, pos + normals[i] * collisionRadius);
+            Vector3 pos = skinnedMesh.transform.TransformPoint(vertices[i]);
+            //Debug.DrawLine(pos, pos + normals[i].normalized * collisionRadius);
             AddPositionToDictionary(pos, normals[i].normalized);
         }
     }
@@ -83,20 +83,19 @@ public class ClothNormalCollisions : MonoBehaviour
     private void Start()
     {
         ResetDict();
-        AddCollisionMeshToDict();
-       /* foreach(var vertGroup in dictionary)
+        for(int i = 0; i < collisionMeshes.Length; ++i)
         {
-            foreach(VertWithNorm vert in vertGroup.Value)
-            {
-                Debug.DrawLine(vert.pos, vert.pos + vert.norm * collisionRadius, Color.red, 1000);
-            }
-        }*/
+            AddCollisionMeshToDict(collisionMeshes[i]);
+        }
     }
 
 
     void Update()
     {
         ResetDict();
-        AddCollisionMeshToDict();
+        for (int i = 0; i < collisionMeshes.Length; ++i)
+        {
+            AddCollisionMeshToDict(collisionMeshes[i]);
+        }
     }
 }

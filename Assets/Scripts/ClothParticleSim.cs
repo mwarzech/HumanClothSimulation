@@ -1,4 +1,4 @@
-﻿#define CLOTH_DEBUG
+﻿//#define CLOTH_DEBUG
 
 using System;
 using System.Collections;
