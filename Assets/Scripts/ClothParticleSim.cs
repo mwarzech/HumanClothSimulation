@@ -174,15 +174,14 @@ public class ClothParticleSim : MonoBehaviour
         {
             for (int i = 0; i < positions.Length; ++i)
             {
-                hasColided |= SatisfyEnvironmentConstraints(i);
                 SatisfyClothConstraints(i);
-                if(s == physicsIterationsPerFrame - 1)
+                hasColided |= SatisfyEnvironmentConstraints(i);
+                if (s == physicsIterationsPerFrame - 1)
                 {
                     //PerformVerletIntegration(i, hasColided);
                     CalculateNormals(i);
                 }
             }
-            SolveLockedConstraints();
         }
     }
 
@@ -192,7 +191,8 @@ public class ClothParticleSim : MonoBehaviour
         Vector3 t2 = positions[neighbours[i][0]];
         Vector3 t3 = positions[neighbours[i][1]];
         Vector3 n = -Vector3.Cross(t2 - t1, t1 - t3).normalized;
-        normals[i] = n;
+        float dot = Vector3.Dot(n, normals[i]);
+        normals[i] = n * Mathf.Sign(dot);
     }
 
     void UpdateMesh()
@@ -258,7 +258,7 @@ public class ClothParticleSim : MonoBehaviour
         }
     }
 
-    bool HandleCLothCollision(int index)
+    bool HandleClothCollision(int index)
     {
         // Sphere collision constraints
         List<VertWithNorm> spheres = collisionHandler.GetNearestPoints(positions[index]);
@@ -267,17 +267,18 @@ public class ClothParticleSim : MonoBehaviour
         int count = 0;
         for (int i = 0; i < spheres.Count; i++)
         {
-#if CLOTH_DEBUG
-            if (index == debugInd)
-            {
-                Debug.DrawLine(spheres[i].pos, spheres[i].pos + spheres[i].norm * collisionHandler.collisionRadius, Color.green, 1000);
-            }
-#endif
             Vector3 sphereDisp = HandleSphereCollision(index, spheres[i]);
             if (sphereDisp.magnitude > 0.001f)
             {
                 disp += sphereDisp;
                 ++count;
+#if CLOTH_DEBUG
+                if (index == debugInd)
+                {
+                    Debug.DrawLine(spheres[i].pos, spheres[i].pos + spheres[i].norm * collisionHandler.collisionRadius, Color.green, 1000);
+                    Debug.DrawLine(positions[index], positions[index] + sphereDisp, Color.cyan, 1000);
+                }
+#endif
             }
         }
         if (count > 0) disp /= count;
@@ -296,7 +297,7 @@ public class ClothParticleSim : MonoBehaviour
         // Platform constraint
         hasColided |= HandleGroundCollision(index, groundLevel);
 
-        hasColided |= HandleCLothCollision(index);
+        hasColided |= HandleClothCollision(index);
 
         return hasColided;
 
@@ -312,91 +313,38 @@ public class ClothParticleSim : MonoBehaviour
         return false;
     }
 
-    Vector3 FindPoinToTriangleVec(Vector3 p, Vector3 v1, Vector3 v2, Vector3 v3)
-    {
-        Vector3 v21 = v2 - v1;
-        Vector3 v32 = v3 - v2;
-        Vector3 v13 = v1 - v3;
-        Vector3 p1 = p - v1;
-        Vector3 p2 = p - v2;
-        Vector3 p3 = p - v3;
-        Vector3 n = Vector3.Cross(v21, v13).normalized;
-
-        bool isInside = (Mathf.Sign(Vector3.Dot(Vector3.Cross(v21, n), p1)) +
-                         Mathf.Sign(Vector3.Dot(Vector3.Cross(v32, n), p2)) +
-                         Mathf.Sign(Vector3.Dot(Vector3.Cross(v13, n), p3)) > 2.0);
-        
-        if (isInside)
-        {
-            float dot = Vector3.Dot(p1, n);
-            return -(n * dot);
-        }
-        else
-        {
-            Vector3 d1 = v21 * Mathf.Clamp(Vector3.Dot(v21, p1) / v21.magnitude, 0.0f, 1.0f) - p1;
-            Vector3 d2 = v32 * Mathf.Clamp(Vector3.Dot(v32, p1) / v32.magnitude, 0.0f, 1.0f) - p2;
-            Vector3 d3 = v13 * Mathf.Clamp(Vector3.Dot(v13, p1) / v13.magnitude, 0.0f, 1.0f) - p3;
-
-            Vector3 result = d1;
-            if (d2.magnitude < result.magnitude) result = d2;
-            if (d3.magnitude < result.magnitude) result = d3;
-            return result;
-        }
-    }
-
     Vector3 HandleSphereCollision(int index, VertWithNorm sphere)
     {
-        Vector3 diff = (positions[index] - sphere.pos);
-        Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
+        Vector3 movVec = positions[index] - oldPositions[index];
+        Vector3 toSphere = oldPositions[index] - sphere.pos;
+        float posOnLine = Vector3.Dot(toSphere, movVec) / movVec.magnitude;
+        posOnLine = Mathf.Clamp(posOnLine, 0, movVec.magnitude);
+        Vector3 closestPoint = oldPositions[index] + movVec.normalized * posOnLine;
+
+        Vector3 diff = closestPoint - sphere.pos;
 
         float dist = diff.magnitude;
 
+
+        if (dist < collisionHandler.collisionRadius + EPSILON)
+        {
+            Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
+            Vector3 posAfterDisp = closestPoint + disp;
+            Vector3 resultDisp = posAfterDisp - positions[index];
+
+            return resultDisp;
+        }
+        return Vector3.zero;
+          /*
+        Vector3 diff = (positions[index] - sphere.pos);
+        Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
+        float dist = diff.magnitude;
+        
         if (dist < collisionHandler.collisionRadius + EPSILON)
         {
             return disp;
         }
         return Vector3.zero;
-    }
-
-    void SolveLockedConstraints()
-    {
-        // Locked to object constraints
-    }
-
-    // source: https://answers.unity.com/questions/280741/how-make-visible-the-back-face-of-a-mesh.html
-    void MakeMeshDoubleFaced()
-    {
-        vertices = mesh.vertices;
-        var normals = mesh.normals;
-        var szV = vertices.Length;
-        var newVerts = new Vector3[szV * 2];
-        var newNorms = new Vector3[szV * 2];
-        for (var j = 0; j < szV; j++)
-        {
-            // duplicate vertices and uvs:
-            newVerts[j] = newVerts[j + szV] = vertices[j];
-            // copy the original normals...
-            newNorms[j] = normals[j];
-            // and revert the new ones
-            newNorms[j + szV] = -normals[j];
-        }
-        var triangles = mesh.triangles;
-        var szT = triangles.Length;
-        var newTris = new int[szT * 2]; // double the triangles
-        for (var i = 0; i < szT; i += 3)
-        {
-            // copy the original triangle
-            newTris[i] = triangles[i];
-            newTris[i + 1] = triangles[i + 1];
-            newTris[i + 2] = triangles[i + 2];
-            // save the new reversed triangle
-            var j = i + szT;
-            newTris[j] = triangles[i] + szV;
-            newTris[j + 2] = triangles[i + 1] + szV;
-            newTris[j + 1] = triangles[i + 2] + szV;
-        }
-        mesh.vertices = newVerts;
-        mesh.normals = newNorms;
-        mesh.triangles = newTris; // assign triangles last!
+        */
     }
 }

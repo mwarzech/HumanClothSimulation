@@ -73,7 +73,10 @@ public class ClothNormalCollisions : MonoBehaviour
         Vector3[] normals = mesh.normals;
         for(int i = 0; i < vertices.Length; ++i)
         {
-            AddPositionToDictionary(collisionMesh.transform.TransformPoint(vertices[i] - normals[i] * collisionRadius * 0.5f), normals[i]);
+            //Vector3 pos = collisionMesh.transform.TransformPoint(vertices[i] - normals[i].normalized * collisionRadius * 0.5f);
+            Vector3 pos = collisionMesh.transform.TransformPoint(vertices[i]);
+            //Debug.DrawLine(pos, pos + normals[i] * collisionRadius);
+            AddPositionToDictionary(pos, normals[i].normalized);
         }
     }
 
