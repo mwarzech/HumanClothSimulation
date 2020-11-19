@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class ClothParticleSim : MonoBehaviour
 {
-    public float EPSILON = 0.01f;
+    private float EPSILON = 0.001f;
 
     [Range(0f,1f)]
     public float damping = 0.99f;
@@ -19,7 +19,7 @@ public class ClothParticleSim : MonoBehaviour
     public int physicsIterationsPerFrame = 50;
 
     Mesh mesh;
-    Vector3 acceleration;
+    public Vector3 acceleration = new Vector3(0.0f, -9.81f, 0.0f);
     Vector3[] vertices;
     Vector3[] positions;
     Vector3[] oldPositions;
@@ -128,7 +128,7 @@ public class ClothParticleSim : MonoBehaviour
     private void Start()
     {
         // Get cloth mesh vertex positions
-        acceleration = new Vector3(0.0f, -9.81f, 0.0f);
+        
 
         //mesh = (Mesh)Instantiate(GetComponent<SkinnedMeshRenderer>().sharedMesh);
         //GetComponent<SkinnedMeshRenderer>().sharedMesh = mesh;
@@ -162,6 +162,7 @@ public class ClothParticleSim : MonoBehaviour
 
     void CalculatePhysics()
     {
+        
         for (int i = 0; i < positions.Length; i++)
         {
             PerformVerletIntegration(i);
@@ -177,10 +178,7 @@ public class ClothParticleSim : MonoBehaviour
                 SatisfyClothConstraints(i);
                 if(s == physicsIterationsPerFrame - 1)
                 {
-                    /*if (!hasColided)
-                    {
-                        PerformVerletIntegration(i);
-                    }*/
+                    //PerformVerletIntegration(i, hasColided);
                     CalculateNormals(i);
                 }
             }
@@ -217,7 +215,7 @@ public class ClothParticleSim : MonoBehaviour
         mesh.RecalculateBounds();
     }
 
-    void PerformVerletIntegration(int posIndex)
+    void PerformVerletIntegration(int posIndex, bool hasColided = false)
     {
         // Transform new local vertex positions to global positions
         positions[posIndex] = transform.TransformPoint(vertices[ClothToVertIndex(posIndex)]);
@@ -227,7 +225,9 @@ public class ClothParticleSim : MonoBehaviour
 
         Vector3 velocity = positions[posIndex] - oldPositions[posIndex];
 
-        positions[posIndex] += velocity * damping + acceleration * Time.deltaTime * Time.deltaTime;
+        Vector3 acc = acceleration;// hasColided ? Vector3.zero : acceleration;
+
+        positions[posIndex] += velocity * damping + acc * Time.deltaTime * Time.deltaTime;
 
         oldPositions[posIndex] = temp;
     }
@@ -276,14 +276,6 @@ public class ClothParticleSim : MonoBehaviour
             Vector3 sphereDisp = HandleSphereCollision(index, spheres[i]);
             if (sphereDisp.magnitude > 0.001f)
             {
-                /*
-#if CLOTH_DEBUG
-                if (index == debugInd)
-                {
-                    Debug.Log(positions[index] + " , " + spheres[i].pos);
-                }
-#endif
-*/
                 disp += sphereDisp;
                 ++count;
             }
