@@ -225,7 +225,7 @@ public class ClothParticleSim : MonoBehaviour
 
         Vector3 velocity = positions[posIndex] - oldPositions[posIndex];
 
-        Vector3 acc = acceleration;// hasColided ? Vector3.zero : acceleration;
+        Vector3 acc = hasColided ? Vector3.zero : acceleration;
 
         positions[posIndex] += velocity * damping + acc * Time.deltaTime * Time.deltaTime;
 

@@ -2726,7 +2726,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collisionMesh: {fileID: 1815815464}
   bucketSize: 1
-  collisionRadius: 0.5
+  collisionRadius: 0.3
 --- !u!114 &919132148554418481
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2739,11 +2739,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17eeb6c11a7fd214cb57eb039da937c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EPSILON: 0.01
-  damping: 0.318
-  tolerance: 0.1
+  damping: 0.834
+  tolerance: 0
   groundLevel: 0
   physicsIterationsPerFrame: 2
+  acceleration: {x: 0, y: -1, z: 0}
   collisionHandler: {fileID: 919132148554418480}
 --- !u!23 &1711813856236792058
 MeshRenderer:

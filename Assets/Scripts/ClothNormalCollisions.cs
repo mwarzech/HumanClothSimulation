@@ -67,11 +67,13 @@ public class ClothNormalCollisions : MonoBehaviour
 
     private void AddCollisionMeshToDict()
     {
-        Vector3[] vertices = collisionMesh.sharedMesh.vertices;
-        Vector3[] normals = collisionMesh.sharedMesh.normals;
+        Mesh mesh = new Mesh();
+        collisionMesh.BakeMesh(mesh);
+        Vector3[] vertices = mesh.vertices;
+        Vector3[] normals = mesh.normals;
         for(int i = 0; i < vertices.Length; ++i)
         {
-            AddPositionToDictionary(collisionMesh.transform.TransformPoint(vertices[i] - normals[i] * collisionRadius), normals[i]);
+            AddPositionToDictionary(collisionMesh.transform.TransformPoint(vertices[i] - normals[i] * collisionRadius * 0.5f), normals[i]);
         }
     }
 
