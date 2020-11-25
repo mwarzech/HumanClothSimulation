@@ -159,25 +159,25 @@ public class ClothParticleSim : MonoBehaviour
         CalculatePhysics();
         UpdateMesh();
     }
-
+    
     void CalculatePhysics()
     {
-        
         for (int i = 0; i < positions.Length; i++)
         {
             PerformVerletIntegration(i);
         }
 
-        bool hasColided = false;
+        //bool hasColided = false;
         // Satisfy constraints
         for (int s = 0; s < physicsIterationsPerFrame; s++)
         {
             for (int i = 0; i < positions.Length; ++i)
             {
                 SatisfyClothConstraints(i);
-                hasColided |= SatisfyEnvironmentConstraints(i);
-                /*if (s == physicsIterationsPerFrame - 1)
+                SatisfyEnvironmentConstraints(i);
+               /* if (s == physicsIterationsPerFrame - 1)
                 {
+                    SatisfyEnvironmentConstraints(i);
                     //PerformVerletIntegration(i, hasColided);
                     //CalculateNormals(i);
                 }*/
@@ -227,7 +227,7 @@ public class ClothParticleSim : MonoBehaviour
 
         Vector3 acc = hasColided ? Vector3.zero : acceleration;
 
-        positions[posIndex] += velocity * damping + acc * Time.deltaTime * Time.deltaTime;
+        positions[posIndex] += velocity * damping + acc * Time.fixedDeltaTime * Time.fixedDeltaTime;
 
         oldPositions[posIndex] = temp;
     }
@@ -268,7 +268,7 @@ public class ClothParticleSim : MonoBehaviour
         for (int i = 0; i < spheres.Count; i++)
         {
             Vector3 sphereDisp = HandleSphereCollision(index, spheres[i]);
-            if (sphereDisp.magnitude > 0.001f)
+            if (sphereDisp.magnitude > EPSILON)
             {
                 disp += sphereDisp;
                 ++count;
@@ -283,7 +283,7 @@ public class ClothParticleSim : MonoBehaviour
         }
         if (count > 0) disp /= count;
         positions[index] += disp;
-        if (disp.magnitude > 0.001f)
+        if (disp.magnitude > EPSILON)
         {
             return true;
         }
@@ -313,8 +313,29 @@ public class ClothParticleSim : MonoBehaviour
         return false;
     }
 
-    Vector3 HandleSphereCollision(int index, VertWithNorm sphere)
+    Vector3 HandlePointToPointCollision(int index, VertWithNorm sphere)
     {
+        Vector3 diff = (positions[index] - sphere.pos);
+        Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
+        float dist = diff.magnitude;
+
+        if (dist < collisionHandler.collisionRadius + EPSILON)
+        {
+            return disp;
+        }
+        return Vector3.zero;
+    }
+
+    Vector3 HandleLineToPointCollision(int index, VertWithNorm sphere)
+    {
+        if (Vector3.Dot(positions[index] - sphere.pos, sphere.norm.normalized) >= collisionHandler.collisionRadius)
+        {
+            return Vector3.zero;
+        }
+        if (oldPositions[index] == positions[index])
+        {
+            return HandlePointToPointCollision(index, sphere);
+        }
         Vector3 movVec = positions[index] - oldPositions[index];
         Vector3 toSphere = oldPositions[index] - sphere.pos;
         float posOnLine = Vector3.Dot(toSphere, movVec) / movVec.magnitude;
@@ -335,7 +356,64 @@ public class ClothParticleSim : MonoBehaviour
             return resultDisp;
         }
         return Vector3.zero;
-          /*
+    }
+
+    Vector3 HandleSphereCollision(int index, VertWithNorm sphere)
+    {
+        if (Vector3.Dot(positions[index] - sphere.pos, sphere.norm.normalized) >= collisionHandler.collisionRadius)
+        {
+            return Vector3.zero;
+        }
+
+        Line clothLine = new Line() { startPos = oldPositions[index], endPos = positions[index] };
+        Line sphereLine = new Line() { startPos = sphere.prevPos, endPos = sphere.pos };
+
+        MathHelper.Result closestLine = MathHelper.DistBetweenSegments(sphereLine, clothLine);
+
+        if (null == closestLine.closest)
+        {
+            return Vector3.zero;
+        }
+        Vector3 diff = closestLine.closest[1] - closestLine.closest[0];
+        Vector3 closestPoint = sphere.pos + diff;
+
+        float dist = diff.magnitude;
+
+        if (dist < collisionHandler.collisionRadius + EPSILON)
+        {
+            Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
+            Vector3 posAfterDisp = closestPoint + disp;
+            Vector3 resultDisp = posAfterDisp - positions[index];
+
+            return resultDisp;
+        }
+        return Vector3.zero;
+
+
+        /*  //Line with point collision
+        Vector3 movVec = positions[index] - oldPositions[index];
+        Vector3 toSphere = oldPositions[index] - sphere.pos;
+        float posOnLine = Vector3.Dot(toSphere, movVec) / movVec.magnitude;
+        posOnLine = Mathf.Clamp(posOnLine, 0, movVec.magnitude);
+        Vector3 closestPoint = oldPositions[index] + movVec.normalized * posOnLine;
+
+        Vector3 diff = closestPoint - sphere.pos;
+
+        float dist = diff.magnitude;
+
+
+        if (dist < collisionHandler.collisionRadius + EPSILON)
+        {
+            Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
+            Vector3 posAfterDisp = closestPoint + disp;
+            Vector3 resultDisp = posAfterDisp - positions[index];
+
+            return resultDisp;
+        }
+        return Vector3.zero;
+        */
+
+        /*  //Simple collision
         Vector3 diff = (positions[index] - sphere.pos);
         Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
         float dist = diff.magnitude;

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public struct VertWithNorm
 {
+    public Vector3 prevPos;
     public Vector3 pos;
     public Vector3 norm;
 }
@@ -14,6 +15,8 @@ public class ClothNormalCollisions : MonoBehaviour
     public float bucketSize = 1f;
     public float collisionRadius;
 
+    private Mesh[] prevMeshes;
+
     private Dictionary<Vector3Int, List<VertWithNorm>> dictionary;
 
     public Vector3Int GetKeyForPosition(Vector3 pos)
@@ -23,14 +26,24 @@ public class ClothNormalCollisions : MonoBehaviour
             (int)Mathf.Floor(pos.z / bucketSize));
     }
 
-    public void AddPositionToDictionary(Vector3 pos, Vector3 norm)
+    public void AddPositionToDictionary(Vector3 pos, Vector3 prevPos, Vector3 norm)
     {
         Vector3Int key = GetKeyForPosition(pos);
+        Vector3Int prevKey = GetKeyForPosition(prevPos);
+        VertWithNorm collisionVert = new VertWithNorm() { pos = pos, prevPos = prevPos, norm = norm };
         if (!dictionary.ContainsKey(key))
         {
             dictionary.Add(key, new List<VertWithNorm>());
         }
-        dictionary[key].Add(new VertWithNorm() { pos = pos, norm = norm });
+        dictionary[key].Add(collisionVert);
+        if(prevKey != key)
+        {
+            if (!dictionary.ContainsKey(prevKey))
+            {
+                dictionary.Add(prevKey, new List<VertWithNorm>());
+            }
+            dictionary[prevKey].Add(collisionVert);
+        }
     }
 
     public List<VertWithNorm> GetNearestPoints(Vector3 pos)
@@ -65,27 +78,45 @@ public class ClothNormalCollisions : MonoBehaviour
         dictionary = new Dictionary<Vector3Int, List<VertWithNorm>>();
     }
 
-    private void AddCollisionMeshToDict(SkinnedMeshRenderer skinnedMesh)
+    private bool resetPrevMeshes = false;
+
+    private IEnumerator ResetCoroutine()
     {
-        Mesh mesh = new Mesh();
-        skinnedMesh.BakeMesh(mesh);
+        resetPrevMeshes = true;
+        yield return new WaitForSeconds(1);
+        resetPrevMeshes = false;
+    }
+
+    public void ResetPrevMeshes()
+    {
+        StartCoroutine(ResetCoroutine());
+    }
+
+    private void AddCollisionMeshToDict(Mesh prevMesh, Mesh mesh, Transform trans)
+    {
         Vector3[] vertices = mesh.vertices;
+        Vector3[] prevVerts = prevMesh.vertices;
         Vector3[] normals = mesh.normals;
         for(int i = 0; i < vertices.Length; ++i)
         {
             //Vector3 pos = collisionMesh.transform.TransformPoint(vertices[i] - normals[i].normalized * collisionRadius * 0.5f);
-            Vector3 pos = skinnedMesh.transform.TransformPoint(vertices[i]);
+            Vector3 pos = trans.TransformPoint(vertices[i]);
+            Vector3 prevPos = trans.TransformPoint(prevVerts[i]);
             //Debug.DrawLine(pos, pos + normals[i].normalized * collisionRadius);
-            AddPositionToDictionary(pos, normals[i].normalized);
+            AddPositionToDictionary(pos, prevPos, normals[i].normalized);
         }
     }
 
     private void Start()
     {
         ResetDict();
+        prevMeshes = new Mesh[collisionMeshes.Length];
         for(int i = 0; i < collisionMeshes.Length; ++i)
         {
-            AddCollisionMeshToDict(collisionMeshes[i]);
+            Mesh mesh = new Mesh();
+            collisionMeshes[i].BakeMesh(mesh);
+            prevMeshes[i] = mesh;
+            AddCollisionMeshToDict(prevMeshes[i], mesh, collisionMeshes[i].transform);
         }
     }
 
@@ -95,7 +126,14 @@ public class ClothNormalCollisions : MonoBehaviour
         ResetDict();
         for (int i = 0; i < collisionMeshes.Length; ++i)
         {
-            AddCollisionMeshToDict(collisionMeshes[i]);
+            Mesh mesh = new Mesh();
+            collisionMeshes[i].BakeMesh(mesh);
+            if (resetPrevMeshes)
+            {
+                prevMeshes[i] = mesh;
+            }
+            AddCollisionMeshToDict(prevMeshes[i], mesh, collisionMeshes[i].transform);
+            prevMeshes[i] = mesh;
         }
     }
 }
