@@ -2380,6 +2380,11 @@ PrefabInstance:
       propertyPath: damping
       value: 0.89
       objectReference: {fileID: 0}
+    - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
+        type: 3}
+      propertyPath: collisionType
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2271954875511779056, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
       propertyPath: m_Name

@@ -9,8 +9,16 @@ using UnityEngine;
 
 public class ClothParticleSim : MonoBehaviour
 {
+    public enum CollisionType
+    {
+        PointToPoint,
+        PointToSegment,
+        SegmentToSegment
+    }
+
     private float EPSILON = 0.001f;
 
+    public CollisionType collisionType;
     [Range(0f,1f)]
     public float damping = 0.99f;
     [Range(0f, 1f)]
@@ -267,7 +275,20 @@ public class ClothParticleSim : MonoBehaviour
         int count = 0;
         for (int i = 0; i < spheres.Count; i++)
         {
-            Vector3 sphereDisp = HandleSphereCollision(index, spheres[i]);
+            Vector3 sphereDisp = Vector3.zero;
+
+            switch (collisionType)
+            {
+                case CollisionType.PointToPoint:
+                    sphereDisp = HandlePointToPointCollision(index, spheres[i]);
+                    break;
+                case CollisionType.PointToSegment:
+                    sphereDisp = HandleLineToPointCollision(index, spheres[i]);
+                    break;
+                case CollisionType.SegmentToSegment:
+                    sphereDisp = HandleSphereCollision(index, spheres[i]);
+                    break;
+            }
             if (sphereDisp.magnitude > EPSILON)
             {
                 disp += sphereDisp;
@@ -315,6 +336,10 @@ public class ClothParticleSim : MonoBehaviour
 
     Vector3 HandlePointToPointCollision(int index, VertWithNorm sphere)
     {
+        if (Vector3.Dot(positions[index] - sphere.pos, sphere.norm.normalized) >= collisionHandler.collisionRadius)
+        {
+            return Vector3.zero;
+        }
         Vector3 diff = (positions[index] - sphere.pos);
         Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
         float dist = diff.magnitude;
