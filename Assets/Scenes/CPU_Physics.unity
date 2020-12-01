@@ -529,6 +529,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: male-cut-off-collision-irrelevent-body-parts
       objectReference: {fileID: 0}
+    - target: {fileID: 7112853415114944279, guid: ce5486dd295045e438243570d7edc3da,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7112853415114944279, guid: ce5486dd295045e438243570d7edc3da,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7112853415114944279, guid: ce5486dd295045e438243570d7edc3da,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ce5486dd295045e438243570d7edc3da, type: 3}
 --- !u!1 &376364544 stripped
@@ -554,10 +569,12 @@ MonoBehaviour:
   - Silly Dancing
   - Rumba Dancing
   collisionHandler: {fileID: 376364547}
-  cloth: {fileID: 919132148554418479}
+  cloths:
+  - {fileID: 919132148554418480}
   dropdown: {fileID: 604349451}
   buttonLabel: {fileID: 856817844}
   anim: {fileID: 376364546}
+  animationSpeed: 0.01
 --- !u!95 &376364546
 Animator:
   serializedVersion: 3
@@ -592,8 +609,8 @@ MonoBehaviour:
   collisionMeshes:
   - {fileID: 534390990}
   - {fileID: 1646499936}
-  bucketSize: 0.6
-  collisionRadius: 0.3
+  bucketSize: 0.5
+  collisionRadius: 0.2
 --- !u!1 &415764880
 GameObject:
   m_ObjectHideFlags: 0
@@ -2282,12 +2299,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 0
---- !u!1 &919132148554418479 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2271954875511779056, guid: 5c47c88501c73534f88ec79517508676,
+--- !u!114 &919132148554418480 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
     type: 3}
   m_PrefabInstance: {fileID: 1389064981707941855}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17eeb6c11a7fd214cb57eb039da937c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1389064981707941855
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2358,7 +2381,7 @@ PrefabInstance:
     - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
       propertyPath: acceleration.y
-      value: -20
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
@@ -2368,7 +2391,7 @@ PrefabInstance:
     - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
@@ -2378,7 +2401,7 @@ PrefabInstance:
     - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
       propertyPath: damping
-      value: 0.89
+      value: 0.962
       objectReference: {fileID: 0}
     - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
@@ -2389,6 +2412,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: tshirt_centered
+      objectReference: {fileID: 0}
+    - target: {fileID: 2271954875511779056, guid: 5c47c88501c73534f88ec79517508676,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5c47c88501c73534f88ec79517508676, type: 3}

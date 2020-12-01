@@ -28,9 +28,16 @@ public class ClothNormalCollisions : MonoBehaviour
 
     public void AddPositionToDictionary(Vector3 pos, Vector3 prevPos, Vector3 norm)
     {
-        Vector3Int key = GetKeyForPosition(pos);
         Vector3Int prevKey = GetKeyForPosition(prevPos);
         VertWithNorm collisionVert = new VertWithNorm() { pos = pos, prevPos = prevPos, norm = norm };
+
+        if (!dictionary.ContainsKey(prevKey))
+        {
+            dictionary.Add(prevKey, new List<VertWithNorm>());
+        }
+        dictionary[prevKey].Add(collisionVert);
+
+        /*
         if (!dictionary.ContainsKey(key))
         {
             dictionary.Add(key, new List<VertWithNorm>());
@@ -43,10 +50,10 @@ public class ClothNormalCollisions : MonoBehaviour
                 dictionary.Add(prevKey, new List<VertWithNorm>());
             }
             dictionary[prevKey].Add(collisionVert);
-        }
+        }*/
     }
 
-    public List<VertWithNorm> GetNearestPoints(Vector3 pos)
+    private Vector3Int[] GetNearestKeys(Vector3 pos)
     {
         Vector3Int key = GetKeyForPosition(pos);
         int xNeighbour = ((key.x - pos.x) > (bucketSize * 0.5f)) ? 1 : -1;
@@ -61,6 +68,14 @@ public class ClothNormalCollisions : MonoBehaviour
         keys[5] = new Vector3Int(key.x, key.y + yNeighbour, key.z + zNeighbour);
         keys[6] = new Vector3Int(key.x + xNeighbour, key.y, key.z + zNeighbour);
         keys[7] = new Vector3Int(key.x + xNeighbour, key.y + yNeighbour, key.z + zNeighbour);
+
+        return keys;
+    }
+
+    public List<VertWithNorm> GetNearestPoints(Vector3 pos)
+    {
+        Vector3Int[] keys = GetNearestKeys(pos);
+
         List<VertWithNorm> points = new List<VertWithNorm>();
         for(int i = 0; i < keys.Length; ++i)
         {

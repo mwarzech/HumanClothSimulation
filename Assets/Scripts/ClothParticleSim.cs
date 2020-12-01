@@ -41,6 +41,8 @@ public class ClothParticleSim : MonoBehaviour
     List<int>[] clothToVerts;
     int[] vertToCloth;
 
+    Vector3[] start_positions;
+
 #if CLOTH_DEBUG
     int debugInd = 1 * 3;
 #endif
@@ -100,10 +102,12 @@ public class ClothParticleSim : MonoBehaviour
     private void InitializePositions(List<int>[] clothToVerts)
     {
         positions = new Vector3[clothToVerts.Length];
+        start_positions = new Vector3[clothToVerts.Length];
         oldPositions = new Vector3[clothToVerts.Length];
         for (int i = 0; i < positions.Length; i++)
         {
             positions[i] = transform.TransformPoint(vertices[ClothToVertIndex(i)]);
+            start_positions[i] = positions[i];
             oldPositions[i] = positions[i];
         }
     }
@@ -165,6 +169,16 @@ public class ClothParticleSim : MonoBehaviour
     private void Update()
     {
         CalculatePhysics();
+        UpdateMesh();
+    }
+
+    public void ResetMesh()
+    {
+        for (int i = 0; i < positions.Length; i++)
+        {
+            oldPositions[i] = start_positions[i];
+            positions[i] = start_positions[i];
+        }
         UpdateMesh();
     }
     
