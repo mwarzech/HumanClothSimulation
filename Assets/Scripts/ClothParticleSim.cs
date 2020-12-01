@@ -26,10 +26,13 @@ public class ClothParticleSim : MonoBehaviour
     public float groundLevel;
     public int physicsIterationsPerFrame = 50;
 
+    public Transform hookTransform;
+
     Mesh mesh;
     public Vector3 acceleration = new Vector3(0.0f, -9.81f, 0.0f);
     Vector3[] vertices;
     Vector3[] positions;
+    Color[] vertColors;
     Vector3[] oldPositions;
     int[] clothTriangles;
     Vector3[] normals;
@@ -42,6 +45,8 @@ public class ClothParticleSim : MonoBehaviour
     int[] vertToCloth;
 
     Vector3[] start_positions;
+
+    Dictionary<int, Vector3> lockedPositions;
 
 #if CLOTH_DEBUG
     int debugInd = 1 * 3;
@@ -104,9 +109,14 @@ public class ClothParticleSim : MonoBehaviour
         positions = new Vector3[clothToVerts.Length];
         start_positions = new Vector3[clothToVerts.Length];
         oldPositions = new Vector3[clothToVerts.Length];
+        lockedPositions = new Dictionary<int, Vector3>();
         for (int i = 0; i < positions.Length; i++)
         {
             positions[i] = transform.TransformPoint(vertices[ClothToVertIndex(i)]);
+            if (IsLockedVertex(ClothToVertIndex(i)))
+            {
+                lockedPositions[i] = hookTransform.InverseTransformPoint(positions[i]);
+            }
             start_positions[i] = positions[i];
             oldPositions[i] = positions[i];
         }
@@ -136,6 +146,11 @@ public class ClothParticleSim : MonoBehaviour
         }
     }
 
+    private bool IsLockedVertex(int vertIndex)
+    {
+        return (vertColors.Length > vertIndex && vertColors[vertIndex].r > 0.5f && null != hookTransform);
+    }
+
     // Use this for initialization
     private void Start()
     {
@@ -148,6 +163,7 @@ public class ClothParticleSim : MonoBehaviour
 
         vertices = mesh.vertices;
         normals = mesh.normals;// new Vector3[mesh.normals.Length];
+        vertColors = mesh.colors;
         InitializeClothVertices(vertices);
         InitializeClothTriangles(mesh.triangles, vertToCloth);
         InitializePositions(clothToVerts);
@@ -161,13 +177,12 @@ public class ClothParticleSim : MonoBehaviour
             Debug.Log(distances[debugInd][i]);
         }
 #endif
-
-        //MakeMeshDoubleFaced();
     }
 
     // Update is called once per frame
     private void Update()
     {
+
         CalculatePhysics();
         UpdateMesh();
     }
@@ -186,6 +201,11 @@ public class ClothParticleSim : MonoBehaviour
     {
         for (int i = 0; i < positions.Length; i++)
         {
+            if (IsLockedVertex(ClothToVertIndex(i)))
+            {
+                positions[i] = transform.TransformPoint(vertices[ClothToVertIndex(i)]);
+                continue;
+            }
             PerformVerletIntegration(i);
         }
 
@@ -196,6 +216,7 @@ public class ClothParticleSim : MonoBehaviour
             for (int i = 0; i < positions.Length; ++i)
             {
                 SatisfyClothConstraints(i);
+                if (IsLockedVertex(ClothToVertIndex(i))) continue;
                 SatisfyEnvironmentConstraints(i);
                /* if (s == physicsIterationsPerFrame - 1)
                 {
@@ -226,7 +247,15 @@ public class ClothParticleSim : MonoBehaviour
         {
             foreach(int vertIndex in clothToVerts[i])
             {
-                vertices[vertIndex] = transform.InverseTransformPoint(positions[i]);
+                if (IsLockedVertex(ClothToVertIndex(i)))
+                {
+                    Vector3 pos = hookTransform.TransformPoint(lockedPositions[i]);
+                    vertices[vertIndex] = transform.InverseTransformPoint(pos);
+                }
+                else
+                {
+                    vertices[vertIndex] = transform.InverseTransformPoint(positions[i]);
+                }
             }
             //vertices[i + positions.Length] = vertices[i];
             //normals[i + positions.Length] = -normals[i];
@@ -275,6 +304,17 @@ public class ClothParticleSim : MonoBehaviour
         if (Mathf.Abs(difference) > tolerance)// tolerance is set close to zero
         {
             Vector3 correction = diffVec * (difference * 0.5f);
+            if (IsLockedVertex(ClothToVertIndex(indexA)) && IsLockedVertex(ClothToVertIndex(indexB))) return;
+            if (IsLockedVertex(ClothToVertIndex(indexA)))
+            {
+                positions[indexB] -= 2 * correction;
+                return;
+            }
+            if (IsLockedVertex(ClothToVertIndex(indexB)))
+            {
+                positions[indexA] += 2 * correction;
+                return;
+            }
             positions[indexA] += correction;
             positions[indexB] -= correction;
         }
