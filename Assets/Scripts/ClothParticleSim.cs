@@ -18,6 +18,7 @@ public class ClothParticleSim : MonoBehaviour
 
     private float EPSILON = 0.001f;
 
+    public float deltaTime = 0.01f;
     public CollisionType collisionType;
     [Range(0f,1f)]
     public float damping = 0.99f;
@@ -278,7 +279,7 @@ public class ClothParticleSim : MonoBehaviour
 
         Vector3 acc = hasColided ? Vector3.zero : acceleration;
 
-        positions[posIndex] += velocity * damping + acc * Time.fixedDeltaTime * Time.fixedDeltaTime;
+        positions[posIndex] += velocity * damping + acc * deltaTime * deltaTime;
 
         oldPositions[posIndex] = temp;
     }
