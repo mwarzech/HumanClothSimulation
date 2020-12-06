@@ -575,7 +575,7 @@ MonoBehaviour:
   dropdown: {fileID: 604349451}
   buttonLabel: {fileID: 856817844}
   anim: {fileID: 376364546}
-  animationSpeed: 0.01
+  animationSpeed: 0.005
 --- !u!95 &376364546
 Animator:
   serializedVersion: 3
@@ -611,7 +611,7 @@ MonoBehaviour:
   - {fileID: 534390990}
   - {fileID: 1646499936}
   bucketSize: 0.5
-  collisionRadius: 0.2
+  collisionRadius: 0.25
 --- !u!1 &415764880
 GameObject:
   m_ObjectHideFlags: 0
@@ -2388,7 +2388,7 @@ PrefabInstance:
     - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
       propertyPath: acceleration.y
-      value: -5
+      value: -9.8
       objectReference: {fileID: 0}
     - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
@@ -2414,6 +2414,11 @@ PrefabInstance:
         type: 3}
       propertyPath: collisionType
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2271954875511779054, guid: 5c47c88501c73534f88ec79517508676,
+        type: 3}
+      propertyPath: deltaTime
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 2271954875511779056, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
@@ -2514,6 +2519,21 @@ PrefabInstance:
       propertyPath: hookTransform
       value: 
       objectReference: {fileID: 1602117170}
+    - target: {fileID: 9138396217766007842, guid: 65d8095bd4627c94c9eb482ff85eea97,
+        type: 3}
+      propertyPath: tolerance
+      value: 0.121
+      objectReference: {fileID: 0}
+    - target: {fileID: 9138396217766007842, guid: 65d8095bd4627c94c9eb482ff85eea97,
+        type: 3}
+      propertyPath: acceleration.y
+      value: -9.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 9138396217766007842, guid: 65d8095bd4627c94c9eb482ff85eea97,
+        type: 3}
+      propertyPath: deltaTime
+      value: 0.01
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 65d8095bd4627c94c9eb482ff85eea97, type: 3}
 --- !u!114 &1819583999984249578 stripped
