@@ -37,6 +37,7 @@ public class ClothParticleSim : MonoBehaviour
     Vector3[] oldPositions;
     int[] clothTriangles;
     Vector3[] normals;
+    Vector3[] meshNormals;
     
     public ClothNormalCollisions collisionHandler;
 
@@ -123,6 +124,15 @@ public class ClothParticleSim : MonoBehaviour
         }
     }
 
+    private void InitializeNormals(List<int>[] clothToVerts)
+    {
+        normals = new Vector3[clothToVerts.Length];
+        for (int i = 0; i < normals.Length; i++)
+        {
+            normals[i] = mesh.normals[ClothToVertIndex(i)];
+        }
+    }
+
     private void InitializeNeighbours(int[] clothTriangles)
     {
         neighbours = new List<int>[positions.Length];
@@ -163,11 +173,12 @@ public class ClothParticleSim : MonoBehaviour
         mesh = GetComponent<MeshFilter>().mesh;
 
         vertices = mesh.vertices;
-        normals = mesh.normals;// new Vector3[mesh.normals.Length];
+        meshNormals =  mesh.normals;// new Vector3[mesh.normals.Length];
         vertColors = mesh.colors;
         InitializeClothVertices(vertices);
         InitializeClothTriangles(mesh.triangles, vertToCloth);
         InitializePositions(clothToVerts);
+        InitializeNormals(clothToVerts);
         InitializeNeighbours(clothTriangles);
         InitializeDistances(positions, neighbours);
 
@@ -219,12 +230,12 @@ public class ClothParticleSim : MonoBehaviour
                 SatisfyClothConstraints(i);
                 if (IsLockedVertex(ClothToVertIndex(i))) continue;
                 SatisfyEnvironmentConstraints(i);
-               /* if (s == physicsIterationsPerFrame - 1)
+                if (s == physicsIterationsPerFrame - 1)
                 {
-                    SatisfyEnvironmentConstraints(i);
+                    //SatisfyEnvironmentConstraints(i);
                     //PerformVerletIntegration(i, hasColided);
-                    //CalculateNormals(i);
-                }*/
+                    CalculateNormals(i);
+                }
             }
         }
     }
@@ -234,9 +245,9 @@ public class ClothParticleSim : MonoBehaviour
         Vector3 t1 = positions[i];
         Vector3 t2 = positions[neighbours[i][0]];
         Vector3 t3 = positions[neighbours[i][1]];
-        Vector3 n = -Vector3.Cross(t2 - t1, t1 - t3).normalized;
-        float dot = Vector3.Dot(n, normals[i]);
-        normals[i] = n * Mathf.Sign(dot);
+        Vector3 n = Vector3.Cross(t2 - t1, t1 - t3).normalized;
+        //float dot = Vector3.Dot(n, normals[i]);
+        normals[i] = n;// * Mathf.Sign(dot);
     }
 
     void UpdateMesh()
@@ -257,12 +268,11 @@ public class ClothParticleSim : MonoBehaviour
                 {
                     vertices[vertIndex] = transform.InverseTransformPoint(positions[i]);
                 }
+                meshNormals[vertIndex] = -transform.InverseTransformDirection(normals[i]);
             }
-            //vertices[i + positions.Length] = vertices[i];
-            //normals[i + positions.Length] = -normals[i];
         }
 
-        mesh.normals = normals;
+        mesh.normals = meshNormals;
         mesh.vertices = vertices;
         mesh.RecalculateBounds();
     }
