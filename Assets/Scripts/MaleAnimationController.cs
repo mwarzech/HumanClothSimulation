@@ -34,7 +34,6 @@ public class MaleAnimationController : MonoBehaviour
 
     private void PlayAnimation()
     {
-        //anim.Play(dropdown.options[dropdown.value].text);
         anim.SetInteger("danceNum", dropdown.value);
         anim.SetBool("dancing", true);
         buttonLabel.text = "Stop Animation";
@@ -45,7 +44,7 @@ public class MaleAnimationController : MonoBehaviour
     {
         anim.SetBool("dancing", false);
         anim.Play(idleStateName);
-        collisionHandler.ResetPrevMeshes();
+        if(collisionHandler) collisionHandler.ResetPrevMeshes();
         buttonLabel.text = "Play Animation";
         isPlaying = false;
 

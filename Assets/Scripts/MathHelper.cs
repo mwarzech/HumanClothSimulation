@@ -10,117 +10,11 @@ public class Line
 
 public class MathHelper
 {
-    public static Vector3 ClampPointToLine(Vector3 pointToClamp, Line lineToClampTo)
-    {
-        Vector3 clampedPoint = new Vector3();
-        float minX, minY, minZ, maxX, maxY, maxZ;
-        if (lineToClampTo.startPos.x <= lineToClampTo.endPos.x)
-        {
-            minX = lineToClampTo.startPos.x;
-            maxX = lineToClampTo.endPos.x;
-        }
-        else
-        {
-            minX = lineToClampTo.endPos.x;
-            maxX = lineToClampTo.startPos.x;
-        }
-        if (lineToClampTo.startPos.y <= lineToClampTo.endPos.y)
-        {
-            minY = lineToClampTo.startPos.y;
-            maxY = lineToClampTo.endPos.y;
-        }
-        else
-        {
-            minY = lineToClampTo.endPos.y;
-            maxY = lineToClampTo.startPos.y;
-        }
-        if (lineToClampTo.startPos.z <= lineToClampTo.endPos.z)
-        {
-            minZ = lineToClampTo.startPos.z;
-            maxZ = lineToClampTo.endPos.z;
-        }
-        else
-        {
-            minZ = lineToClampTo.endPos.z;
-            maxZ = lineToClampTo.startPos.z;
-        }
-        clampedPoint.x = (pointToClamp.x < minX) ? minX : (pointToClamp.x > maxX) ? maxX : pointToClamp.x;
-        clampedPoint.y = (pointToClamp.y < minY) ? minY : (pointToClamp.y > maxY) ? maxY : pointToClamp.y;
-        clampedPoint.z = (pointToClamp.z < minZ) ? minZ : (pointToClamp.z > maxZ) ? maxZ : pointToClamp.z;
-        return clampedPoint;
-    }
-
-    public static Line distBetweenLines(Line l1, Line l2)
-    {
-        Vector3 p1, p2, p3, p4, d1, d2;
-        p1 = l1.startPos;
-        p2 = l1.endPos;
-        p3 = l2.startPos;
-        p4 = l2.endPos;
-        d1 = p2 - p1;
-        d2 = p4 - p3;
-        float eq1nCoeff = (d1.x * d2.x) + (d1.y * d2.y) + (d1.z * d2.z);
-        float eq1mCoeff = (-(Mathf.Pow(d1.x, 2)) - (Mathf.Pow(d1.y, 2)) - (Mathf.Pow(d1.z, 2)));
-        float eq1Const = ((d1.x * p3.x) - (d1.x * p1.x) + (d1.y * p3.y) - (d1.y * p1.y) + (d1.z * p3.z) - (d1.z * p1.z));
-        float eq2nCoeff = ((Mathf.Pow(d2.x, 2)) + (Mathf.Pow(d2.y, 2)) + (Mathf.Pow(d2.z, 2)));
-        float eq2mCoeff = -(d1.x * d2.x) - (d1.y * d2.y) - (d1.z * d2.z);
-        float eq2Const = ((d2.x * p3.x) - (d2.x * p1.x) + (d2.y * p3.y) - (d2.y * p2.y) + (d2.z * p3.z) - (d2.z * p1.z));
-        float[,] M = new float[,] { { eq1nCoeff, eq1mCoeff, -eq1Const }, { eq2nCoeff, eq2mCoeff, -eq2Const } };
-        int rowCount = M.GetUpperBound(0) + 1;
-        // pivoting
-        for (int col = 0; col + 1 < rowCount; col++) if (M[col, col] == 0)
-            // check for zero coefficients
-            {
-                // find non-zero coefficient
-                int swapRow = col + 1;
-                for (; swapRow < rowCount; swapRow++) if (M[swapRow, col] != 0) break;
-
-                if (M[swapRow, col] != 0) // found a non-zero coefficient?
-                {
-                    // yes, then swap it with the above
-                    float[] tmp = new float[rowCount + 1];
-                    for (int i = 0; i < rowCount + 1; i++)
-                    { tmp[i] = M[swapRow, i]; M[swapRow, i] = M[col, i]; M[col, i] = tmp[i]; }
-                }
-                else return null; // no, then the matrix has no unique solution
-            }
-
-        // elimination
-        for (int sourceRow = 0; sourceRow + 1 < rowCount; sourceRow++)
-        {
-            for (int destRow = sourceRow + 1; destRow < rowCount; destRow++)
-            {
-                float df = M[sourceRow, sourceRow];
-                float sf = M[destRow, sourceRow];
-                for (int i = 0; i < rowCount + 1; i++)
-                    M[destRow, i] = M[destRow, i] * df - M[sourceRow, i] * sf;
-            }
-        }
-
-        // back-insertion
-        for (int row = rowCount - 1; row >= 0; row--)
-        {
-            float f = M[row, row];
-            if (f == 0) return null;
-
-            for (int i = 0; i < rowCount + 1; i++) M[row, i] /= f;
-            for (int destRow = 0; destRow < row; destRow++)
-            { M[destRow, rowCount] -= M[destRow, row] * M[row, rowCount]; M[destRow, row] = 0; }
-        }
-        float n = M[0, 2];
-        float m = M[1, 2];
-        Vector3 i1 = new Vector3(p1.x + (m * d1.x), p1.y + (m * d1.y), p1.z + (m * d1.z));
-        Vector3 i2 = new Vector3(p3.x + (n * d2.x), p3.y + (n * d2.y), p3.z + (n * d2.z));
-        Vector3 i1Clamped = ClampPointToLine(i1, l1);
-        Vector3 i2Clamped = ClampPointToLine(i2, l2);
-        return new Line { startPos = i1Clamped, endPos = i2Clamped };
-    }
-
-    public struct Result
+    public struct CollisionResult
     {
         public float distance, sqrDistance;
         public float[] parameter;
-        public Vector3[] closest;
+        public Vector3[] coords;
     };
 
     private static float GetClampedRoot(float slope, float h0, float h1)
@@ -294,15 +188,15 @@ public class MathHelper
         }
     }
 
-    public static Result DistBetweenSegments(Line segment0,
+    public static CollisionResult DistBetweenSegments(Line segment0,
         Line segment1)
     {
         return DistBetweenSegments(segment0.startPos, segment0.endPos, segment1.startPos, segment1.endPos);
     }
 
-    public static Result DistBetweenSegments(Vector3 P0, Vector3 P1, Vector3 Q0, Vector3 Q1)
+    public static CollisionResult DistBetweenSegments(Vector3 P0, Vector3 P1, Vector3 Q0, Vector3 Q1)
     {
-        Result result = new Result() { parameter = new float[2], closest = new Vector3[2] };
+        CollisionResult result = new CollisionResult() { parameter = new float[2], coords = new Vector3[2] };
         float mA, mB, mC, mD, mE;
         float mF00, mF10, mF01, mF11;
         float mG00, mG10, mG01, mG11;
@@ -391,9 +285,9 @@ public class MathHelper
             }
         }
 
-        result.closest[0] = ((float)1 - result.parameter[0]) * P0 + result.parameter[0] * P1;
-        result.closest[1] = ((float)1 - result.parameter[1]) * Q0 + result.parameter[1] * Q1;
-        Vector3 diff = result.closest[0] - result.closest[1];
+        result.coords[0] = ((float)1 - result.parameter[0]) * P0 + result.parameter[0] * P1;
+        result.coords[1] = ((float)1 - result.parameter[1]) * Q0 + result.parameter[1] * Q1;
+        Vector3 diff = result.coords[0] - result.coords[1];
         result.sqrDistance = Vector3.Dot(diff, diff);
         result.distance = Mathf.Sqrt(result.sqrDistance);
         return result;

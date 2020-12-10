@@ -26,14 +26,14 @@ public class TestLineCollision : MonoBehaviour
         Line clothLine = new Line() { startPos = p1.position, endPos = p2.position };
         Line sphereLine = new Line() { startPos = p3.position, endPos = p4.position };
 
-        MathHelper.Result closestLine = MathHelper.DistBetweenSegments(sphereLine, clothLine);
+        MathHelper.CollisionResult closestLine = MathHelper.DistBetweenSegments(sphereLine, clothLine);
 
-        if (null == closestLine.closest)
+        if (null == closestLine.coords)
         {
             return Vector3.zero;
         }
-        Debug.DrawLine(closestLine.closest[1], closestLine.closest[0], Color.white);
-        Vector3 diff = closestLine.closest[1] - closestLine.closest[0];
+        Debug.DrawLine(closestLine.coords[1], closestLine.coords[0], Color.white);
+        Vector3 diff = closestLine.coords[1] - closestLine.coords[0];
         Vector3 closestPoint = p4.position + diff;
 
         float dist = diff.magnitude;

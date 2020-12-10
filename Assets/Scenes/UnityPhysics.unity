@@ -368,53 +368,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &415764880
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 415764881}
-  - component: {fileID: 415764882}
-  m_Layer: 0
-  m_Name: SpheresGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &415764881
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 415764880}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -78.84997, y: -77.6588, z: -150.94412}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &415764882
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 415764880}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 758a669714cb38940ab057fb058484fb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meshRenderer: {fileID: 1815815464}
-  cloth: {fileID: 1336999702}
-  sphereRadius: 1
-  skipVertex: 10
 --- !u!1 &446189841
 GameObject:
   m_ObjectHideFlags: 0
@@ -2982,7 +2935,21 @@ Cloth:
     collisionSphereDistance: 3.4028235e+38
   - maxDistance: 3.4028235e+38
     collisionSphereDistance: 3.4028235e+38
-  m_CapsuleColliders: []
+  m_CapsuleColliders:
+  - {fileID: 752260764}
+  - {fileID: 1815815471}
+  - {fileID: 1815815470}
+  - {fileID: 1815815469}
+  - {fileID: 1815815468}
+  - {fileID: 1815815467}
+  - {fileID: 1815815466}
+  - {fileID: 1815815465}
+  - {fileID: 793661133}
+  - {fileID: 1134198344}
+  - {fileID: 1363551131}
+  - {fileID: 818110291}
+  - {fileID: 1187362876}
+  - {fileID: 1820076733}
   m_SphereColliders: []
   m_SelfCollisionDistance: 0
   m_SelfCollisionStiffness: 0.2
@@ -3010,7 +2977,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e2aa0f23e9b62054588a896e430222b9, type: 2}
+  - {fileID: 2100000, guid: 067d2e9e71396f948b6ee324a78565b0, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3485,12 +3452,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1815815455}
   m_PrefabAsset: {fileID: 0}
---- !u!137 &1815815464 stripped
-SkinnedMeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -5920088804180647039, guid: 4ad561f259587384eb2a5ad58269cc6e,
-    type: 3}
-  m_PrefabInstance: {fileID: 1815815455}
-  m_PrefabAsset: {fileID: 0}
 --- !u!136 &1815815465
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3647,13 +3608,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animations:
-  - Swing Dancing
-  - Silly Dancing
   - Rumba Dancing
-  cloth: {fileID: 1336999701}
+  - Silly Dancing
+  - Swing Dancing
+  collisionHandler: {fileID: 0}
+  cloths: []
   dropdown: {fileID: 604349451}
   buttonLabel: {fileID: 856817844}
   anim: {fileID: 1827160855}
+  animationSpeed: 0.01
 --- !u!1 &2097766385
 GameObject:
   m_ObjectHideFlags: 0

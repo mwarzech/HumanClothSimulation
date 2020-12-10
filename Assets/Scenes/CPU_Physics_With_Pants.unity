@@ -565,9 +565,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animations:
-  - Swing Dancing
-  - Silly Dancing
   - Rumba Dancing
+  - Silly Dancing
+  - Swing Dancing
   collisionHandler: {fileID: 376364547}
   cloths:
   - {fileID: 919132148554418480}
@@ -2325,6 +2325,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 326342319051050789, guid: 5c47c88501c73534f88ec79517508676,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 067d2e9e71396f948b6ee324a78565b0, type: 2}
     - target: {fileID: 1498654417399379018, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
       propertyPath: m_LocalPosition.x

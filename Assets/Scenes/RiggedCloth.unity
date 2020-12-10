@@ -355,12 +355,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animations:
-  - Swing Dancing
-  - Silly Dancing
   - Rumba Dancing
+  - Silly Dancing
+  - Swing Dancing
+  collisionHandler: {fileID: 0}
+  cloths: []
   dropdown: {fileID: 604349451}
   buttonLabel: {fileID: 856817844}
   anim: {fileID: 0}
+  animationSpeed: 0.01
 --- !u!95 &282231948
 Animator:
   serializedVersion: 3

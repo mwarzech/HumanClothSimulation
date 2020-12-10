@@ -565,16 +565,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animations:
-  - Swing Dancing
-  - Silly Dancing
   - Rumba Dancing
+  - Silly Dancing
+  - Swing Dancing
   collisionHandler: {fileID: 376364547}
   cloths:
   - {fileID: 919132148554418480}
   dropdown: {fileID: 604349451}
   buttonLabel: {fileID: 856817844}
   anim: {fileID: 376364546}
-  parentAnim: {fileID: 376364546}
   animationSpeed: 0.008
 --- !u!95 &376364546
 Animator:
@@ -1855,7 +1854,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 15, z: 40}
+  m_LocalPosition: {x: 0, y: 15, z: 29.78}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -2319,6 +2318,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 326342319051050789, guid: 5c47c88501c73534f88ec79517508676,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 067d2e9e71396f948b6ee324a78565b0, type: 2}
     - target: {fileID: 1498654417399379018, guid: 5c47c88501c73534f88ec79517508676,
         type: 3}
       propertyPath: m_LocalPosition.x

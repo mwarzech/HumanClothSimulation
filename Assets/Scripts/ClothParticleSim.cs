@@ -23,7 +23,7 @@ public class ClothParticleSim : MonoBehaviour
     [Range(0f,1f)]
     public float damping = 0.99f;
     [Range(0f, 1f)]
-    public float tolerance = 0.1f;// the lower, the stiffer the cloth
+    public float tolerance = 0f;// the lower, the stiffer the cloth
     public float groundLevel;
     public int physicsIterationsPerFrame = 50;
 
@@ -162,18 +162,13 @@ public class ClothParticleSim : MonoBehaviour
         return (vertColors.Length > vertIndex && vertColors[vertIndex].r > 0.5f && null != hookTransform);
     }
 
-    // Use this for initialization
+    // Initialization
     private void Start()
     {
-        // Get cloth mesh vertex positions
-        
-
-        //mesh = (Mesh)Instantiate(GetComponent<SkinnedMeshRenderer>().sharedMesh);
-        //GetComponent<SkinnedMeshRenderer>().sharedMesh = mesh;
         mesh = GetComponent<MeshFilter>().mesh;
 
         vertices = mesh.vertices;
-        meshNormals =  mesh.normals;// new Vector3[mesh.normals.Length];
+        meshNormals =  mesh.normals;
         vertColors = mesh.colors;
         InitializeClothVertices(vertices);
         InitializeClothTriangles(mesh.triangles, vertToCloth);
@@ -211,6 +206,7 @@ public class ClothParticleSim : MonoBehaviour
     
     void CalculatePhysics()
     {
+        // Perform Verlet integration
         for (int i = 0; i < positions.Length; i++)
         {
             if (IsLockedVertex(ClothToVertIndex(i)))
@@ -220,8 +216,7 @@ public class ClothParticleSim : MonoBehaviour
             }
             PerformVerletIntegration(i);
         }
-
-        //bool hasColided = false;
+        
         // Satisfy constraints
         for (int s = 0; s < physicsIterationsPerFrame; s++)
         {
@@ -232,8 +227,6 @@ public class ClothParticleSim : MonoBehaviour
                 SatisfyEnvironmentConstraints(i);
                 if (s == physicsIterationsPerFrame - 1)
                 {
-                    //SatisfyEnvironmentConstraints(i);
-                    //PerformVerletIntegration(i, hasColided);
                     CalculateNormals(i);
                 }
             }
@@ -246,8 +239,7 @@ public class ClothParticleSim : MonoBehaviour
         Vector3 t2 = positions[neighbours[i][0]];
         Vector3 t3 = positions[neighbours[i][1]];
         Vector3 n = Vector3.Cross(t2 - t1, t1 - t3).normalized;
-        //float dot = Vector3.Dot(n, normals[i]);
-        normals[i] = n;// * Mathf.Sign(dot);
+        normals[i] = n;
     }
 
     void UpdateMesh()
@@ -379,10 +371,8 @@ public class ClothParticleSim : MonoBehaviour
     bool SatisfyEnvironmentConstraints(int index)
     {
         bool hasColided = false;
-
-        // Platform constraint
+        
         hasColided |= HandleGroundCollision(index, groundLevel);
-
         hasColided |= HandleBodyCollision(index);
 
         return hasColided;
@@ -458,13 +448,13 @@ public class ClothParticleSim : MonoBehaviour
         Line clothLine = new Line() { startPos = oldPositions[index], endPos = positions[index] };
         Line sphereLine = new Line() { startPos = sphere.prevPos, endPos = sphere.pos };
 
-        MathHelper.Result closestLine = MathHelper.DistBetweenSegments(sphereLine, clothLine);
+        MathHelper.CollisionResult closestLine = MathHelper.DistBetweenSegments(sphereLine, clothLine);
 
-        if (null == closestLine.closest)
+        if (null == closestLine.coords)
         {
             return Vector3.zero;
         }
-        Vector3 diff = closestLine.closest[1] - closestLine.closest[0];
+        Vector3 diff = closestLine.coords[1] - closestLine.coords[0];
         Vector3 closestPoint = sphere.pos + diff;
 
         float dist = diff.magnitude;
@@ -478,41 +468,5 @@ public class ClothParticleSim : MonoBehaviour
             return resultDisp;
         }
         return Vector3.zero;
-
-
-        /*  //Line with point collision
-        Vector3 movVec = positions[index] - oldPositions[index];
-        Vector3 toSphere = oldPositions[index] - sphere.pos;
-        float posOnLine = Vector3.Dot(toSphere, movVec) / movVec.magnitude;
-        posOnLine = Mathf.Clamp(posOnLine, 0, movVec.magnitude);
-        Vector3 closestPoint = oldPositions[index] + movVec.normalized * posOnLine;
-
-        Vector3 diff = closestPoint - sphere.pos;
-
-        float dist = diff.magnitude;
-
-
-        if (dist < collisionHandler.collisionRadius + EPSILON)
-        {
-            Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
-            Vector3 posAfterDisp = closestPoint + disp;
-            Vector3 resultDisp = posAfterDisp - positions[index];
-
-            return resultDisp;
-        }
-        return Vector3.zero;
-        */
-
-        /*  //Simple collision
-        Vector3 diff = (positions[index] - sphere.pos);
-        Vector3 disp = sphere.norm * (collisionHandler.collisionRadius - Vector3.Dot(diff, sphere.norm));
-        float dist = diff.magnitude;
-        
-        if (dist < collisionHandler.collisionRadius + EPSILON)
-        {
-            return disp;
-        }
-        return Vector3.zero;
-        */
     }
 }

@@ -14,6 +14,8 @@ public class ClothNormalCollisions : MonoBehaviour
     public SkinnedMeshRenderer[] collisionMeshes;
     public float bucketSize = 1f;
     public float collisionRadius;
+    [Range(0, 1)]
+    public float collisionSpheresOffset = 0f;
 
     private Mesh[] prevMeshes;
 
@@ -36,21 +38,6 @@ public class ClothNormalCollisions : MonoBehaviour
             dictionary.Add(prevKey, new List<VertWithNorm>());
         }
         dictionary[prevKey].Add(collisionVert);
-
-        /*
-        if (!dictionary.ContainsKey(key))
-        {
-            dictionary.Add(key, new List<VertWithNorm>());
-        }
-        dictionary[key].Add(collisionVert);
-        if(prevKey != key)
-        {
-            if (!dictionary.ContainsKey(prevKey))
-            {
-                dictionary.Add(prevKey, new List<VertWithNorm>());
-            }
-            dictionary[prevKey].Add(collisionVert);
-        }*/
     }
 
     private Vector3Int[] GetNearestKeys(Vector3 pos)
@@ -114,10 +101,9 @@ public class ClothNormalCollisions : MonoBehaviour
         Vector3[] normals = mesh.normals;
         for(int i = 0; i < vertices.Length; ++i)
         {
-            //Vector3 pos = collisionMesh.transform.TransformPoint(vertices[i] - normals[i].normalized * collisionRadius * 0.5f);
-            Vector3 pos = trans.TransformPoint(vertices[i]);
+            Vector3 pos = transform.TransformPoint(vertices[i] - normals[i].normalized * collisionRadius * collisionSpheresOffset);
             Vector3 prevPos = trans.TransformPoint(prevVerts[i]);
-            Debug.DrawLine(pos, pos + normals[i].normalized * collisionRadius);
+            //Debug.DrawLine(pos, pos + normals[i].normalized * collisionRadius);
             AddPositionToDictionary(pos, prevPos, normals[i].normalized);
         }
     }
